@@ -27,7 +27,7 @@ def ptt_url(url, max_articles, max_comment):
         for articles_found in soup.find_all('div', class_='e7-right-top-container e7-no-outline-all-descendants', limit=max_articles):
             article_title = articles_found.find('span', class_='e7-show-if-device-is-not-xs')
             
-            if article_title is not None:
+            try:
                 article_title = article_title.text
                 #print(article_title)
 
@@ -37,8 +37,8 @@ def ptt_url(url, max_articles, max_comment):
                     
                     article_data = ptt_article(article_url, max_comment)
                     ptt_data += article_data
-            else:
-                continue
+            except:
+                print('無標題')
 
         return ptt_data
 
@@ -73,19 +73,19 @@ def ptt_article(article_url, max_comment):
     for article in soup.find_all('div', class_='yellow--text text--darken-2 e7-recommend-message', limit = max_comment):
         article_comment = article.find('span')
 
-        if article_comment is not None:
+        try:
             article_comment = article_comment.text
 
             if (not re.match('.*://.*',article_comment)):
-                #print(article_comment)
+                print(article_comment)
 
                 article_data.append({
                 "instruction": article_title,
                 "input": "",
                 "output": article_comment
                 })
-        else:
-            continue
+        except:
+            print('無內文')
     
     return article_data
 
@@ -96,9 +96,9 @@ def to_JSON():
     url = 'https://www.pttweb.cc/hot/not-news/today'
     # url = 'https://www.pttweb.cc/hot/comic/today'
 
-    ptt_data = ptt_url(url,50,500)
+    ptt_data = ptt_url(url,5,5)
 
-    with open('data/ptt_data1.json', 'w', encoding='utf-8') as f:
+    with open('data/ptt_data2.json', 'w', encoding='utf-8') as f:
         json.dump(ptt_data, f, indent=4, ensure_ascii=False)
 
 to_JSON()
@@ -107,6 +107,10 @@ to_JSON()
 
 
 # def test():
-#     ptt_article('https://www.pttweb.cc/bbs/C_Chat/M.1716247157.A.770', 5)
+#     art_data = []    
+#     art_data += ptt_article('https://www.pttweb.cc/bbs/C_Chat/M.1716257370.A.D36', 500)
+
+#     with open('data/ptt_data2.json', 'w', encoding='utf-8') as f:
+#         json.dump(art_data, f, indent=4, ensure_ascii=False)
 
 # test()
