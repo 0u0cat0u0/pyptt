@@ -40,7 +40,11 @@ def ptt_article(article_url, max_comment):
         soup = BeautifulSoup(response.content, 'html.parser')
 
         article_title = soup.select_one('#main-content .article-metaline:nth-child(3) .article-meta-value').text
-        article_title = re.sub(r'\s*\[.*?\]\s*', '', article_title)
+
+        if re.search('\s*\[發錢\]\s*',article_title) or re.search('\s*\[推投\]\s*',article_title):
+            return
+
+        article_title = re.sub('\s*\[.*?\]\s*', '', article_title)
         #print(article_title)
 
         if re.search('.*?\(發錢\).*?',article_title) or re.search('.*?（發錢）.*?',article_title):
@@ -67,11 +71,12 @@ def ptt_article(article_url, max_comment):
 
 def to_JSON():
     #url = 'https://www.pttweb.cc/hot/all/today'
-    url = 'https://www.pttweb.cc/hot/not-news/today'
+    #url = 'https://www.pttweb.cc/hot/not-news/today'
+    url = 'https://www.pttweb.cc/hot/comic/today'
 
     ptt_data = ptt_url(url,30,300)
 
-    with open('ptt_data1.json', 'w', encoding='utf-8') as f:
+    with open('ptt_data2.json', 'w', encoding='utf-8') as f:
         json.dump(ptt_data, f, indent=4, ensure_ascii=False)
 
 
