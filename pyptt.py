@@ -25,15 +25,20 @@ def ptt_url(url, max_articles, max_comment):
         soup = BeautifulSoup(response.content, 'html.parser')
 
         for articles_found in soup.find_all('div', class_='e7-right-top-container e7-no-outline-all-descendants', limit=max_articles):
-            article_title = articles_found.find('span', class_='e7-show-if-device-is-not-xs').text
-            #print(article_title)
+            article_title = articles_found.find('span', class_='e7-show-if-device-is-not-xs')
+            
+            if article_title is not None:
+                article_title = article_title.text
+                #print(article_title)
 
-            if not (re.search('\s*\[發錢\]\s*',article_title) or re.search('\s*\[推投\]\s*',article_title) or re.search('.*?\(發錢\).*?',article_title) or re.search('.*?（發錢）.*?',article_title) or re.search('.*?直播單.*?',article_title)):
-                article_url = 'https://www.pttweb.cc' + articles_found.find('a').get('href')
-                #print(article_url)
-                
-                article_data = ptt_article(article_url, max_comment)
-                ptt_data += article_data
+                if not (re.search('\s*\[發錢\]\s*',article_title) or re.search('\s*\[推投\]\s*',article_title) or re.search('.*?\(發錢\).*?',article_title) or re.search('.*?（發錢）.*?',article_title) or re.search('.*?直播單.*?',article_title)):
+                    article_url = 'https://www.pttweb.cc' + articles_found.find('a').get('href')
+                    #print(article_url)
+                    
+                    article_data = ptt_article(article_url, max_comment)
+                    ptt_data += article_data
+            else:
+                continue
 
         return ptt_data
 
@@ -62,16 +67,21 @@ def ptt_article(article_url, max_comment):
     print(article_title)
     
     for article in soup.find_all('div', class_='yellow--text text--darken-2 e7-recommend-message', limit = max_comment):
-        article_comment = article.find('span').text
+        article_comment = article.find('span')
 
-        if not re.match('.*://.*',article_comment):
-            print(article_comment)
+        if article_comment is not None:
+            article_comment = article_comment.text
 
-            article_data.append({
-            "instruction": article_title,
-            "input": "",
-            "output": article_comment
-            })
+            if (not re.match('.*://.*',article_comment)):
+                print(article_comment)
+
+                article_data.append({
+                "instruction": article_title,
+                "input": "",
+                "output": article_comment
+                })
+        else:
+            continue
     
     return article_data
 
@@ -82,11 +92,16 @@ def to_JSON():
     #url = 'https://www.pttweb.cc/hot/not-news/today'
     url = 'https://www.pttweb.cc/hot/comic/today'
 
-    ptt_data = ptt_url(url,3,3)
+    ptt_data = ptt_url(url,50,500)
 
     with open('data/ptt_data.json', 'w', encoding='utf-8') as f:
         json.dump(ptt_data, f, indent=4, ensure_ascii=False)
 
+#to_JSON()
 
 
-to_JSON()
+
+def test():
+    ptt_article('https://www.pttweb.cc/bbs/C_Chat/M.1716257370.A.D36', 500)
+
+test()
